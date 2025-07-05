@@ -1,0 +1,81 @@
+B1: sudo apt install git bc bison flex libssl-dev make libc6-dev libncurses5-dev
+	sudo apt install crossbuild-essential-arm64
+B2: 	git clone --depth=1 --branch rpi-5.4.y https://github.com/raspberrypi/linux
+
+B3:	cd linux
+KERNEL=kernel8
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
+B4:  	make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- menuconfig
+chỉnh menuconfig giống trong sách 
+
+Device Drivers  --->
+	 [*] SPI support  ---> 
+	 	<*>   User mode SPI device driver support
+		<*>   BCM2835 SPI controller 
+	    I2C support  --->
+			I2C Hardware Bus support  --->
+				<*> Broadcom BCM2835 I2C controller
+	-*- LED Support  ---> 
+		{*}   LED Class Support 
+		-*-   LED Trigger support  --->   
+			<*>   LED Timer Trigger  
+			<*>   LED Heartbeat Trigger
+	<*> Industrial I/O support  --->  
+		-*-   Enable buffer support within IIO 
+		{*}     Industrial I/O buffering based on kfifo 
+		<*>   Enable IIO configuration via configfs
+		-*-   Enable triggered sampling support 
+		<*>   Enable software IIO device support
+		<*>   Enable software triggers support    
+		    Triggers - standalone  --->
+			  	<*> High resolution timer trigger 
+				<*> SYSFS trigger
+	Input device support  ---> 
+		-*- Generic input layer (needed for keyboard, mouse, ...) 
+		{*}   Polled input device skeleton  
+		<*>   Event interface
+	<*> Userspace I/O drivers  --->
+		<*>   Userspace I/O platform driver with generic IRQ handling                                                                   
+		<*>   Userspace platform driver with generic irq and dynamic memory
+
+B5: 	make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image modules dtbs -j3 (-j3 là do máy có 2 nhân *1.5 = 3)
+B6: 	Kiểm tra "head Makefile -n 4" (phiên bản = VERSION.PATCHLEVEL.SUBLEVEL)
+***********************************************************************************************************
+"Cho ai ko có ras pi"
+***********************************************************************************************************
+B7: 	https://downloads.raspberrypi.org/raspios_lite_armhf/release_notes.txt lên web này tra phiên bản ngày tháng 
+B8: 	https://downloads.raspberrypi.org/ để download phiên bản phù hợp
+B9: 	vào thư mục home cài qemu với :        wget https://download.qemu.org/qemu-6.2.0.tar.xz
+B10:      giải nén                      tar xvJf qemu-6.2.0.tar.xz 
+B11: 	sudo apt-get install build-essential zlib1g-dev pkg-config libglib2.0-dev binutils-dev libboost-all-dev autoconf libtool libssl-dev libpixman-1-dev python3-pip virtualenv ninja-build
+B12: 	cd qemu-6.2.0
+B13: 	./configure 
+B14: 	make -j8
+B15: 	vào .bashrc rồi export PATH=$PATH:<đường dẫn của qemu-6.2.0/build>     (phần trong dấu ngoặc nhọn)
+B16: 	source ~/.bashrc
+B17: 	cài launch.sh để ở trong file này 
+B18: 	tạo 1 folder chứa file .img và launch.sh và làm theo các bước sau
+B19 	cấp quyền và chạy launch.sh 
+nếu có lỗi qemu 
+chạy lệnh
+sudo apt update
+sudo apt install qemu qemu-system-aarch64
+nếu chạy ko dc thì thử lệnh "qemu-img resize disk.img 4G"
+user: pi
+pass: raspberry
+* chú ý tắt máy ảo raspi đúng cách
+nhập sudo shutdown now
+**************************************************************************************************************
+B20: 	insmod thử thôi 
+
+
+
+b1: tạo Makefile + file C (link đi kèm)
+b2: chạy make
+b3: chạy make deploy
+b4: xem trên raspi đã nhận dc file .ko trên thư mục home chưa: ls-l
+b5: ta chạy file .ko đó:
+sudo insmod tenfile.ko
+dmesg | tail
+sudo rmmod tenfile.ko
+dmesg | tail
